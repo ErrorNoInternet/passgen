@@ -2,6 +2,8 @@ use arrayvec::ArrayString;
 use clap::{ArgAction, Parser};
 use std::io::{BufWriter, StdoutLock, Write};
 
+const STRING_SIZE: usize = 512;
+
 #[derive(Parser, Debug)]
 #[command(author, version, about)]
 struct Arguments {
@@ -18,7 +20,7 @@ fn generate(
     stdout_bufwriter: &mut BufWriter<StdoutLock>,
     keywords: &Vec<&str>,
     level: usize,
-    prefix: &mut ArrayString<256>,
+    prefix: &mut ArrayString<STRING_SIZE>,
 ) {
     if level == 0 {
         stdout_bufwriter.write_all(prefix.as_bytes()).unwrap();
@@ -64,7 +66,7 @@ fn main() {
     }
 
     let mut stdout_bufwriter = BufWriter::new(std::io::stdout().lock());
-    let mut prefix = ArrayString::<256>::new();
+    let mut prefix = ArrayString::<STRING_SIZE>::new();
     for i in 0..=keywords.len() {
         generate(&mut stdout_bufwriter, &keywords, i, &mut prefix)
     }
