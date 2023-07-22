@@ -1,13 +1,13 @@
 use std::io::{BufWriter, StdoutLock, Write};
 
-const ITEMS: &[&str] = &["a", "b", "c", "d", "e", "f", "g", "h"];
+const ITEMS: &[&str] = &["a", "b", "c", "d", "e", "f", "g", "h", "i"];
 
 fn generate(stdout_bufwriter: &mut BufWriter<StdoutLock>, level: usize, prefix: &mut String) {
     if level == 0 {
-        stdout_bufwriter.write(prefix.as_bytes()).unwrap();
-        stdout_bufwriter.write(b"\n").unwrap();
+        stdout_bufwriter.write_all(prefix.as_bytes()).unwrap();
+        stdout_bufwriter.write_all(b"\n").unwrap();
     } else {
-        for &item in ITEMS {
+        for item in ITEMS {
             let previous_len = prefix.len();
             prefix.push_str(item);
             generate(stdout_bufwriter, level - 1, prefix);
