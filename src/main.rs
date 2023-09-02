@@ -11,7 +11,7 @@ struct Arguments {
     #[arg(short, long, action = ArgAction::Append, required = true)]
     keyword: Vec<String>,
 
-    /// Calculate how many passwords there will be
+    /// Calculate output sizes
     #[arg(short, long, required = false)]
     calculate_size: bool,
 }
