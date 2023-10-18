@@ -18,7 +18,7 @@ struct Arguments {
 
 fn generate(
     stdout_bufwriter: &mut BufWriter<StdoutLock>,
-    keywords: &Vec<&str>,
+    keywords: &[&str],
     level: usize,
     prefix: &mut ArrayString<STRING_SIZE>,
 ) {
