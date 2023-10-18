@@ -5,8 +5,10 @@ edition = "2021"
 
 [profile.release]
 codegen-units = 1
-lto = true
-opt-level = 3
+debug-assertions = false
+overflow-checks = false
+panic = "abort"
+strip = "debuginfo"
 
 [dependencies]
 arrayvec = "0.7.4"
