@@ -26,8 +26,8 @@ fn generate(
         stdout_bufwriter.write_all(prefix.as_bytes()).unwrap();
         stdout_bufwriter.write_all(b"\n").unwrap();
     } else {
+        let previous_length = prefix.len();
         for item in keywords {
-            let previous_length = prefix.len();
             prefix.push_str(item);
             generate(stdout_bufwriter, keywords, level - 1, prefix);
             prefix.truncate(previous_length);
