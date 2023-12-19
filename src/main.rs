@@ -45,16 +45,16 @@ fn calculate_combinations(n: u128, i: u32) -> u128 {
 
 fn main() {
     let arguments = Arguments::parse();
-    let keywords: Vec<&str> = arguments.keyword.iter().map(|item| item.as_str()).collect();
+    let keywords: Vec<&str> = arguments.keyword.iter().map(std::string::String::as_str).collect();
 
     if arguments.calculate_size {
-        let lines = calculate_combinations(keywords.len() as u128, keywords.len() as u32) + 1;
+        let lines = calculate_combinations(keywords.len() as u128, keywords.len().try_into().unwrap()) + 1;
         let average_length =
             keywords.iter().map(|item| item.len()).sum::<usize>() as f64 / keywords.len() as f64;
         let mut estimated_bytes = 1.0;
         for i in 1..=keywords.len() {
-            let current_lines = keywords.len().pow(i as u32) as f64;
-            estimated_bytes += current_lines + current_lines * (average_length * i as f64)
+            let current_lines = keywords.len().pow(i.try_into().unwrap()) as f64;
+            estimated_bytes += current_lines + current_lines * (average_length * i as f64);
         }
         println!(
             "keywords: {}\n\nline count: {}\nestimated bytes: {}",
@@ -68,6 +68,6 @@ fn main() {
     let mut stdout_bufwriter = BufWriter::new(std::io::stdout().lock());
     let mut prefix = ArrayString::<STRING_SIZE>::new();
     for i in 0..=keywords.len() {
-        generate(&mut stdout_bufwriter, &keywords, i, &mut prefix)
+        generate(&mut stdout_bufwriter, &keywords, i, &mut prefix);
     }
 }
