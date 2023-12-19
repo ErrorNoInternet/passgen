@@ -37,7 +37,7 @@ fn generate(
 
 fn calculate_combinations(n: u128, i: u32) -> u128 {
     if i == 1 {
-        return n.into();
+        n
     } else {
         n.pow(i) + calculate_combinations(n, i - 1)
     }
