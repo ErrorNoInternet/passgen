@@ -9,7 +9,7 @@ debug-assertions = false
 lto = "fat"
 overflow-checks = false
 panic = "abort"
-strip = "debuginfo"
+strip = "symbols"
 
 [dependencies]
 arrayvec = "0.7.4"
