@@ -8,7 +8,7 @@ const STRING_SIZE: usize = 512;
 #[command(version)]
 struct Arguments {
     /// Add a keyword to the list
-    #[arg(short, long, action = ArgAction::Append, required = true)]
+    #[arg(action = ArgAction::Append, required = true)]
     keyword: Vec<String>,
 
     /// Calculate output sizes
