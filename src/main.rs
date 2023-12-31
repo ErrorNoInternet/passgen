@@ -5,7 +5,7 @@ use std::io::{BufWriter, StdoutLock, Write};
 const STRING_SIZE: usize = 512;
 
 #[derive(Parser, Debug)]
-#[command(author, version, about)]
+#[command(version)]
 struct Arguments {
     /// Add a keyword to the list
     #[arg(short, long, action = ArgAction::Append, required = true)]
