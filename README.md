@@ -1,7 +1,9 @@
 # passgen
-A program that generates passwords (combinations) using a given set of keywords.
 
-For example, giving "a", "b", and "c" would generate 40 outcomes (142 bytes):
+A program that generates passwords (combinations) using a given set of keywords. Currently the Rust version is the fastest, but optimization PRs are welcome!
+
+For example, giving "a", "b", and "c" would generate 40 outcomes (142 bytes), including the empty new line at the start:
+
 ```
 
 a
@@ -10,7 +12,7 @@ c
 aa
 ab
 ac
-...
+[...]
 cba
 cbb
 cbc
