@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
             long double current_lines = pow(keyword_count, (long double)i);
             bytes += current_lines + current_lines * (average_length * i);
         }
-        printf("keywords: %d\n\nline count: %llu\nbytes: %.0Lf\n",
+        printf("keywords: %d\n\nlines: %llu\nbytes: %.0Lf\n",
                keyword_count, lines, bytes);
     } else {
         for (i = 0; i < keyword_count; i++) {
