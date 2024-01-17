@@ -1,61 +1,105 @@
 const std = @import("std");
+const Allocator = std.mem.Allocator;
+const stdout = std.io.getStdOut().writer();
+const math = std.math;
 
-pub fn calculate_combinations(n: u128, i: u8) u128 {
+const BUFFER_SIZE = 8192;
+const PREFIX_SIZE = 512;
+
+var buffer: [BUFFER_SIZE]u8 = undefined;
+var buffer_usage: usize = 0;
+
+fn generate(
+    allocator: Allocator,
+    keywords: [][]const u8,
+    keyword_count: u8,
+    keyword_lengths: []const u8,
+    prefix: *[PREFIX_SIZE]u8,
+    prefix_length: usize,
+    level: u8,
+) !void {
+    if (buffer_usage >= BUFFER_SIZE - prefix_length) {
+        _ = try stdout.writeAll(buffer[0..buffer_usage]);
+        buffer_usage = 0;
+    }
+    if (level == 0) {
+        prefix[prefix_length] = '\n';
+        std.mem.copy(u8, buffer[buffer_usage..], prefix[0 .. prefix_length + 1]);
+        buffer_usage += prefix_length + 1;
+    } else {
+        var i: u8 = 0;
+        while (i < keyword_count) : (i += 1) {
+            const keyword_length = keyword_lengths[i];
+            std.mem.copy(u8, prefix[prefix_length..], keywords[i][0..keyword_length]);
+            _ = try generate(allocator, keywords, keyword_count, keyword_lengths, prefix, prefix_length + keyword_length, level - 1);
+        }
+    }
+}
+
+fn calculate_combinations(n: u64, i: u32) u64 {
     if (i == 1) {
         return n;
     } else {
-        return std.math.pow(u128, n, i) + calculate_combinations(n, i - 1);
+        return math.pow(u64, n, i) + calculate_combinations(n, i - 1);
     }
 }
 
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    const allocator = gpa.allocator();
     defer _ = gpa.deinit();
+    const allocator = gpa.allocator();
+
+    var keywords = try std.ArrayList([]const u8).initCapacity(allocator, 64);
+    defer keywords.deinit();
+
+    var keyword_lengths: [64]u8 = undefined;
+    var do_calculate_combinations = false;
+    var keyword_count: u8 = 0;
 
     const argv = try std.process.argsAlloc(allocator);
     defer std.process.argsFree(allocator, argv);
     var argc: u8 = 0;
-
-    var calculate_size = false;
-    var keyword_count: u8 = 0;
-    var keywords: [256][]u8 = undefined;
     for (argv) |arg| {
-        argc += 1;
-        if (argc == 1) {
+        if (argc == 0) {
+            argc += 1;
             continue;
         }
 
-        if (std.mem.eql(u8, arg, "-c")) {
-            calculate_size = true;
+        if (std.mem.eql(u8, "-c", arg)) {
+            do_calculate_combinations = true;
         } else {
-            keywords[keyword_count] = arg;
+            try keywords.append(arg);
+            keyword_lengths[keyword_count] = @truncate(arg.len);
             keyword_count += 1;
         }
     }
     if (keyword_count == 0) {
-        std.debug.print("no keywords supplied!\n", .{});
-        std.os.exit(1);
+        try stdout.print("no keywords specified!\n", .{});
+        return;
     }
 
-    if (calculate_size) {
-        const lines = 1 + calculate_combinations(keyword_count, keyword_count);
-        var length_sum: u16 = 0;
-        for (0..keyword_count) |ki| {
-            length_sum += @truncate(keywords[ki].len);
+    if (do_calculate_combinations) {
+        const lines = calculate_combinations(keyword_count, @as(u32, keyword_count)) + 1;
+        var average_length: f64 = 0;
+        for (keywords.items) |keyword| {
+            average_length += @as(f64, @floatFromInt(keyword.len));
         }
-        const average_length: f64 = @as(f64, @floatFromInt(length_sum)) / @as(f64, @floatFromInt(keyword_count));
+        average_length /= @as(f64, @floatFromInt(keyword_count));
         var bytes: f64 = 1.0;
-        for (1..keyword_count + 1) |i| {
+        var i: u32 = 1;
+        while (i <= keyword_count) : (i += 1) {
             const ii = @as(f64, @floatFromInt(i));
-            const level_lines = std.math.pow(f64, @as(f64, @floatFromInt(keyword_count)), ii);
-            bytes += level_lines + level_lines * (average_length * ii);
+            const current_lines = math.pow(f64, @as(f64, @floatFromInt(keyword_count)), ii);
+            bytes += current_lines + current_lines * (average_length * ii);
         }
-        std.debug.print("keywords: {d}\n\nlines: {d}\nbytes: {d}\n", .{ keyword_count, lines, bytes });
+        try stdout.print("keywords: {}\n\nline : {}\nbytes: {d}\n", .{ keyword_count, lines, bytes });
+    } else {
+        var prefix: [PREFIX_SIZE]u8 = undefined;
+        for (0..keyword_count + 1) |i| {
+            _ = try generate(allocator, keywords.items, keyword_count, &keyword_lengths, &prefix, 0, @truncate(i));
+        }
     }
-
-    const stdout = std.io.getStdOut();
-    var buffered_writer = std.io.bufferedWriter(stdout.writer());
-    const stdout_writer = buffered_writer.writer();
-    _ = stdout_writer;
+    if (buffer_usage > 0) {
+        _ = try stdout.writeAll(buffer[0..buffer_usage]);
+    }
 }
