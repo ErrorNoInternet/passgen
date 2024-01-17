@@ -92,7 +92,7 @@ pub fn main() !void {
             const currentLines = math.pow(f64, @as(f64, @floatFromInt(keywordCount)), ii);
             bytes += currentLines + currentLines * (averageLength * ii);
         }
-        try stdout.print("keywords: {}\n\nline : {}\nbytes: {d}\n", .{ keywordCount, lines, bytes });
+        try stdout.print("keywords: {}\n\nlines: {}\nbytes: {d}\n", .{ keywordCount, lines, bytes });
     } else {
         var prefix: [PREFIX_SIZE]u8 = undefined;
         for (0..keywordCount + 1) |i| {
