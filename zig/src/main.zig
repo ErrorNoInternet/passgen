@@ -11,7 +11,7 @@ var buffer_usage: usize = 0;
 
 fn generate(
     allocator: Allocator,
-    keywords: *[][]const u8,
+    keywords: [][]const u8,
     keyword_count: u8,
     keyword_lengths: *[64]u8,
     prefix: *[PREFIX_SIZE]u8,
@@ -96,7 +96,7 @@ pub fn main() !void {
     } else {
         var prefix: [PREFIX_SIZE]u8 = undefined;
         for (0..keyword_count + 1) |i| {
-            _ = try generate(allocator, &keywords.items, keyword_count, &keyword_lengths, &prefix, 0, @truncate(i));
+            _ = try generate(allocator, keywords.items, keyword_count, &keyword_lengths, &prefix, 0, @truncate(i));
         }
     }
     if (buffer_usage > 0) {
