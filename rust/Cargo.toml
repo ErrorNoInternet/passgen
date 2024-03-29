@@ -5,12 +5,11 @@ edition = "2021"
 
 [profile.release]
 codegen-units = 1
-debug-assertions = false
-lto = "fat"
+lto = true
 overflow-checks = false
 panic = "abort"
 strip = "symbols"
 
 [dependencies]
-arrayvec = "0.7.4"
-clap = { version = "4.3.19", features = ["derive"] }
+arrayvec = "0"
+clap = { version = "4", features = ["derive"] }
