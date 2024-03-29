@@ -1,4 +1,3 @@
-use arrayvec::ArrayString;
 use clap::{ArgAction, Parser};
 use std::{
     fs::File,
@@ -24,17 +23,25 @@ fn generate(
     stdout_bufwriter: &mut BufWriter<File>,
     keywords: &[&str],
     level: usize,
-    prefix: &mut ArrayString<STRING_SIZE>,
+    prefix: &mut [u8; STRING_SIZE],
+    prefix_len: usize,
 ) {
     if level == 0 {
-        stdout_bufwriter.write_all(prefix.as_bytes()).unwrap();
-        stdout_bufwriter.write_all(b"\n").unwrap();
+        prefix[prefix_len] = b'\n';
+        stdout_bufwriter
+            .write_all(&prefix[..prefix_len + 1])
+            .unwrap();
     } else {
-        let previous_length = prefix.len();
         for item in keywords {
-            prefix.push_str(item);
-            generate(stdout_bufwriter, keywords, level - 1, prefix);
-            prefix.truncate(previous_length);
+            let item_len = item.len();
+            prefix[prefix_len..prefix_len + item_len].copy_from_slice(item.as_bytes());
+            generate(
+                stdout_bufwriter,
+                keywords,
+                level - 1,
+                prefix,
+                prefix_len + item_len,
+            );
         }
     }
 }
@@ -74,9 +81,9 @@ fn main() {
 
     unsafe {
         let mut stdout_bufwriter = BufWriter::new(File::from_raw_fd(1));
-        let mut prefix = ArrayString::<STRING_SIZE>::new();
+        let mut prefix = [0u8; STRING_SIZE];
         for i in 0..=keywords.len() {
-            generate(&mut stdout_bufwriter, &keywords, i, &mut prefix);
+            generate(&mut stdout_bufwriter, &keywords, i, &mut prefix, 0);
         }
     }
 }

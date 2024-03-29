@@ -11,5 +11,8 @@ panic = "abort"
 strip = "symbols"
 
 [dependencies]
-arrayvec = "0"
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", default-features = false, features = [
+  "derive",
+  "help",
+  "std",
+] }
