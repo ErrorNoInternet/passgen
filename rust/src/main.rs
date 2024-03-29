@@ -1,6 +1,10 @@
 use arrayvec::ArrayString;
 use clap::{ArgAction, Parser};
-use std::io::{BufWriter, StdoutLock, Write};
+use std::{
+    fs::File,
+    io::{BufWriter, Write},
+    os::fd::FromRawFd,
+};
 
 const STRING_SIZE: usize = 512;
 
@@ -17,7 +21,7 @@ struct Arguments {
 }
 
 fn generate(
-    stdout_bufwriter: &mut BufWriter<StdoutLock>,
+    stdout_bufwriter: &mut BufWriter<File>,
     keywords: &[&str],
     level: usize,
     prefix: &mut ArrayString<STRING_SIZE>,
@@ -68,9 +72,11 @@ fn main() {
         return;
     }
 
-    let mut stdout_bufwriter = BufWriter::new(std::io::stdout().lock());
-    let mut prefix = ArrayString::<STRING_SIZE>::new();
-    for i in 0..=keywords.len() {
-        generate(&mut stdout_bufwriter, &keywords, i, &mut prefix);
+    unsafe {
+        let mut stdout_bufwriter = BufWriter::new(File::from_raw_fd(1));
+        let mut prefix = ArrayString::<STRING_SIZE>::new();
+        for i in 0..=keywords.len() {
+            generate(&mut stdout_bufwriter, &keywords, i, &mut prefix);
+        }
     }
 }
