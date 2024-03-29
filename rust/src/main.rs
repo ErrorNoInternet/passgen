@@ -15,32 +15,30 @@ struct Arguments {
     keyword: Vec<String>,
 
     /// Calculate output sizes
-    #[arg(short, long, required = false)]
+    #[arg(short, long)]
     calculate_size: bool,
 }
 
 fn generate(
     stdout_bufwriter: &mut BufWriter<File>,
-    keywords: &[&str],
-    level: usize,
+    keywords: &[&[u8]],
     prefix: &mut [u8; STRING_SIZE],
     prefix_len: usize,
+    level: usize,
 ) {
     if level == 0 {
         prefix[prefix_len] = b'\n';
-        stdout_bufwriter
-            .write_all(&prefix[..prefix_len + 1])
-            .unwrap();
+        stdout_bufwriter.write_all(&prefix[..=prefix_len]).unwrap();
     } else {
         for item in keywords {
             let item_len = item.len();
-            prefix[prefix_len..prefix_len + item_len].copy_from_slice(item.as_bytes());
+            prefix[prefix_len..prefix_len + item_len].copy_from_slice(item);
             generate(
                 stdout_bufwriter,
                 keywords,
-                level - 1,
                 prefix,
                 prefix_len + item_len,
+                level - 1,
             );
         }
     }
@@ -79,11 +77,13 @@ fn main() {
         return;
     }
 
+    let keywords = keywords.iter().map(|k| k.as_bytes()).collect::<Vec<_>>();
+
     unsafe {
         let mut stdout_bufwriter = BufWriter::new(File::from_raw_fd(1));
         let mut prefix = [0u8; STRING_SIZE];
         for i in 0..=keywords.len() {
-            generate(&mut stdout_bufwriter, &keywords, i, &mut prefix, 0);
+            generate(&mut stdout_bufwriter, &keywords, &mut prefix, 0, i);
         }
     }
 }
