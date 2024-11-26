@@ -24,13 +24,13 @@ fn generate(
     }
     if (level == 0) {
         prefix[prefix_length] = '\n';
-        std.mem.copy(u8, buffer[buffer_usage..], prefix[0 .. prefix_length + 1]);
+        std.mem.copyForwards(u8, buffer[buffer_usage..], prefix[0 .. prefix_length + 1]);
         buffer_usage += prefix_length + 1;
     } else {
         var i: u8 = 0;
         while (i < keyword_count) : (i += 1) {
             const keyword_length = keyword_lengths[i];
-            std.mem.copy(u8, prefix[prefix_length..], keywords[i][0..keyword_length]);
+            std.mem.copyForwards(u8, prefix[prefix_length..], keywords[i][0..keyword_length]);
             _ = try generate(allocator, keywords, keyword_count, keyword_lengths, prefix, prefix_length + keyword_length, level - 1);
         }
     }
