@@ -9,8 +9,8 @@
 char buffer[BUFFER_SIZE];
 unsigned short buffer_usage;
 
-void generate(char keywords[64][64], unsigned char keyword_count,
-              unsigned char keyword_lengths[64], char prefix[PREFIX_SIZE],
+void generate(char keywords[16][16], unsigned char keyword_count,
+              unsigned char keyword_lengths[16], char prefix[PREFIX_SIZE],
               unsigned char prefix_length, unsigned char level) {
     if (buffer_usage >= BUFFER_SIZE - prefix_length) {
         write(1, buffer, buffer_usage);
@@ -40,12 +40,12 @@ unsigned long long calculate_combinations(unsigned long long n,
 }
 
 int main(int argc, char *argv[]) {
-    char keywords[64][64];
+    char keywords[16][16];
     unsigned char keyword_count = 0;
-    unsigned char keyword_lengths[64];
+    unsigned char keyword_lengths[16];
     int do_calculate_combinations = 0;
-
     int i;
+
     for (i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-c")) {
             do_calculate_combinations = 1;
@@ -70,8 +70,8 @@ int main(int argc, char *argv[]) {
             long double current_lines = pow(keyword_count, (long double)i);
             bytes += current_lines + current_lines * (average_length * i);
         }
-        printf("keywords: %d\n\nlines: %llu\nbytes: %.0Lf\n",
-               keyword_count, lines, bytes);
+        printf("keywords: %d\n\nlines: %llu\nbytes: %.0Lf\n", keyword_count,
+               lines, bytes);
     } else {
         for (i = 0; i < keyword_count; i++) {
             keyword_lengths[i] = strlen(keywords[i]);
