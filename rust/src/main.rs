@@ -78,7 +78,6 @@ fn main() {
     }
 
     let keywords = keywords.iter().map(|k| k.as_bytes()).collect::<Vec<_>>();
-
     unsafe {
         let mut stdout_bufwriter = BufWriter::new(File::from_raw_fd(1));
         let mut prefix = [0u8; STRING_SIZE];
