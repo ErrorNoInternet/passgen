@@ -1,7 +1,5 @@
 const std = @import("std");
-const Allocator = std.mem.Allocator;
 const stdout = std.io.getStdOut().writer();
-const math = std.math;
 
 const BUFFER_SIZE = 8192;
 const PREFIX_SIZE = 512;
@@ -10,7 +8,7 @@ var buffer: [BUFFER_SIZE]u8 = undefined;
 var buffer_usage: usize = 0;
 
 fn generate(
-    allocator: Allocator,
+    allocator: std.mem.Allocator,
     keywords: [][]const u8,
     keyword_count: u8,
     keyword_lengths: *[64]u8,
@@ -40,7 +38,7 @@ fn calculateCombinations(n: u64, i: u32) u64 {
     if (i == 1) {
         return n;
     } else {
-        return math.pow(u64, n, i) + calculateCombinations(n, i - 1);
+        return std.math.pow(u64, n, i) + calculateCombinations(n, i - 1);
     }
 }
 
@@ -89,7 +87,7 @@ pub fn main() !void {
         var i: u32 = 1;
         while (i <= keyword_count) : (i += 1) {
             const ii = @as(f64, @floatFromInt(i));
-            const currentLines = math.pow(f64, @as(f64, @floatFromInt(keyword_count)), ii);
+            const currentLines = std.math.pow(f64, @as(f64, @floatFromInt(keyword_count)), ii);
             bytes += currentLines + currentLines * (average_length * ii);
         }
         try stdout.print("keywords: {}\n\nlines: {}\nbytes: {d}\n", .{ keyword_count, lines, bytes });
