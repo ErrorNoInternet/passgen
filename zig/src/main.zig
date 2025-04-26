@@ -8,7 +8,6 @@ var buffer: [BUFFER_SIZE]u8 = undefined;
 var buffer_usage: usize = 0;
 
 fn generate(
-    allocator: std.mem.Allocator,
     keywords: [][]const u8,
     keyword_count: u8,
     keyword_lengths: *[64]u8,
@@ -29,7 +28,7 @@ fn generate(
         while (i < keyword_count) : (i += 1) {
             const keyword_length = keyword_lengths[i];
             std.mem.copyForwards(u8, prefix[prefix_length..], keywords[i][0..keyword_length]);
-            _ = try generate(allocator, keywords, keyword_count, keyword_lengths, prefix, prefix_length + keyword_length, level - 1);
+            _ = try generate(keywords, keyword_count, keyword_lengths, prefix, prefix_length + keyword_length, level - 1);
         }
     }
 }
@@ -94,7 +93,7 @@ pub fn main() !void {
     } else {
         var prefix: [PREFIX_SIZE]u8 = undefined;
         for (0..keyword_count + 1) |i| {
-            _ = try generate(allocator, keywords.items, keyword_count, &keyword_lengths, &prefix, 0, @truncate(i));
+            _ = try generate(keywords.items, keyword_count, &keyword_lengths, &prefix, 0, @truncate(i));
         }
     }
     if (buffer_usage > 0) {
