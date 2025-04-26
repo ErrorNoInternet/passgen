@@ -1,3 +1,5 @@
+#![warn(clippy::pedantic)]
+
 use clap::{ArgAction, Parser};
 use std::{
     fs::File,
@@ -28,7 +30,11 @@ fn generate(
 ) {
     if level == 0 {
         prefix[prefix_len] = b'\n';
-        stdout_bufwriter.write_all(&prefix[..=prefix_len]).unwrap();
+        unsafe {
+            stdout_bufwriter
+                .write_all(&prefix[..=prefix_len])
+                .unwrap_unchecked()
+        };
     } else {
         for item in keywords {
             let item_len = item.len();
@@ -54,11 +60,7 @@ fn calculate_combinations(n: u128, i: u32) -> u128 {
 
 fn main() {
     let arguments = Arguments::parse();
-    let keywords: Vec<&str> = arguments
-        .keyword
-        .iter()
-        .map(std::string::String::as_str)
-        .collect();
+    let keywords: Vec<&str> = arguments.keyword.iter().map(String::as_str).collect();
 
     if arguments.calculate_size {
         let lines =
