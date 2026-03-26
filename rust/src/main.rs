@@ -1,4 +1,5 @@
 #![warn(clippy::pedantic)]
+#![allow(clippy::cast_precision_loss)]
 
 use clap::{ArgAction, Parser};
 use std::{
@@ -33,7 +34,7 @@ fn generate(
         unsafe {
             stdout_bufwriter
                 .write_all(&prefix[..=prefix_len])
-                .unwrap_unchecked()
+                .unwrap_unchecked();
         };
     } else {
         for item in keywords {
