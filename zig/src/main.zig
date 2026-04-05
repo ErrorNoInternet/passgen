@@ -60,8 +60,8 @@ pub fn main() !void {
     defer std.process.argsFree(allocator, argv);
     var argc: u8 = 0;
     for (argv) |arg| {
-        if (argc == 0) {
-            argc += 1;
+        argc += 1;
+        if (argc == 1) {
             continue;
         }
 
