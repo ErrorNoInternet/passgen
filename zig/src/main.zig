@@ -6,11 +6,8 @@ const PREFIX_SIZE = 512;
 var buf: [BUFFER_SIZE]u8 = undefined;
 var buf_len: usize = 0;
 
-var stdout_buf: [BUFFER_SIZE]u8 = undefined;
-var stdout_writer = std.fs.File.stdout().writer(&stdout_buf);
-const stdout = &stdout_writer.interface;
-
 fn generate(
+    stdout: *std.Io.Writer,
     keywords: [][]const u8,
     keyword_count: u8,
     keyword_lengths: *[64]u8,
@@ -31,7 +28,7 @@ fn generate(
         while (i < keyword_count) : (i += 1) {
             const keyword_len = keyword_lengths[i];
             std.mem.copyForwards(u8, prefix[prefix_len..], keywords[i][0..keyword_len]);
-            _ = try generate(keywords, keyword_count, keyword_lengths, prefix, prefix_len + keyword_len, level - 1);
+            _ = try generate(stdout, keywords, keyword_count, keyword_lengths, prefix, prefix_len + keyword_len, level - 1);
         }
     }
 }
@@ -44,10 +41,8 @@ fn calculateCombinations(n: u64, i: u32) u64 {
     }
 }
 
-pub fn main() !void {
-    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
+pub fn main(init: std.process.Init) !void {
+    const allocator = std.heap.page_allocator;
 
     var keywords = try std.ArrayList([]const u8).initCapacity(allocator, 64);
     defer keywords.deinit(allocator);
@@ -56,10 +51,9 @@ pub fn main() !void {
     var do_calculate_combinations = false;
     var keyword_count: u8 = 0;
 
-    const argv = try std.process.argsAlloc(allocator);
-    defer std.process.argsFree(allocator, argv);
+    var args = init.minimal.args.iterate();
     var argc: u8 = 0;
-    for (argv) |arg| {
+    while (args.next()) |arg| {
         argc += 1;
         if (argc == 1) {
             continue;
@@ -73,6 +67,10 @@ pub fn main() !void {
             keyword_count += 1;
         }
     }
+
+    var stdout_buf: [BUFFER_SIZE]u8 = undefined;
+    var stdout_writer = std.Io.File.stdout().writer(init.io, &stdout_buf);
+    const stdout = &stdout_writer.interface;
 
     if (keyword_count == 0) {
         try stdout.print("no keywords specified!\n", .{});
@@ -90,7 +88,7 @@ pub fn main() !void {
         var bytes: f64 = 1.0;
         var i: u32 = 1;
         while (i <= keyword_count) : (i += 1) {
-            const ii = @as(f64, @floatFromInt(i));
+            const ii: f64 = @floatFromInt(i);
             const cur_lines = std.math.pow(f64, @as(f64, @floatFromInt(keyword_count)), ii);
             bytes += cur_lines + cur_lines * (avg_len * ii);
         }
@@ -102,7 +100,7 @@ pub fn main() !void {
 
     var prefix: [PREFIX_SIZE]u8 = undefined;
     for (0..keyword_count + 1) |i| {
-        _ = try generate(keywords.items, keyword_count, &keyword_lengths, &prefix, 0, @truncate(i));
+        _ = try generate(stdout, keywords.items, keyword_count, &keyword_lengths, &prefix, 0, @truncate(i));
     }
 
     if (buf_len > 0) {
